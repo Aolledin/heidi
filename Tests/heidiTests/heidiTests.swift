@@ -1,4 +1,5 @@
 import XCTest
+import LogicKit
 @testable import heidi
 
 class heidiTests: XCTestCase {
