@@ -40,7 +40,7 @@ let sanester  = Value("Sanester")
 let davent    = Value("Davent")
 let davos     = Value("Davos")
 let plaun     = Value("Plaun")
-let returnar  = Value("Retournar")
+let returnar  = Value("Returnar")
 let sa_fermar = Value("Sa fermar")
 
 
@@ -66,6 +66,7 @@ o € OrdreTita, s €  SeqOrdreTita
 o::pause::s € SeqOrdreTita
 
 ici, les :: sont la concaténation soit de deux listes entre elles, soit d'un élément et d'une liste.
+J'ai choisi d'ajouter une pause à la fin de la séquence pour simplifier l'implémentation, et ceci ne poserait pas de problème à Heidi.
 
 
 */
@@ -125,7 +126,7 @@ func reconnaisDavent(SeqSifl: Term, reste: Term) -> Goal{
         reste1 === List.cons(wheeo, reste2) &&
         reste2 === List.cons(wheet, reste3) &&
         reste3 === List.cons(wheet, reste4) &&
-        reste4 === List.cons(pause, reste)&&
+        reste4 === List.cons(pause, reste)
 
 
     }
@@ -142,7 +143,7 @@ func reconnaisDavos(SeqSifl: Term, reste: Term) -> Goal{
         SeqSifl === List.cons(who, reste1) &&
         reste1 === List.cons(hee, reste2) &&
         reste2 === List.cons(who, reste3) &&
-        reste3 === List.cons(pause, reste)&&
+        reste3 === List.cons(pause, reste)
     }
 }
 
@@ -160,7 +161,7 @@ func reconnaisPlaun(SeqSifl: Term, reste: Term) -> Goal{
         reste1 === List.cons(hee, reste2) &&
         reste2 === List.cons(hee, reste3) &&
         reste3 === List.cons(hee, reste4) &&
-        reste4 === List.cons(pause, reste)&&
+        reste4 === List.cons(pause, reste)
 
 
     }
@@ -177,7 +178,7 @@ func reconnaisReturnar(SeqSifl: Term, reste: Term) -> Goal{
         SeqSifl === List.cons(whee, reste1) &&
         reste1 === List.cons(whee, reste2) &&
         reste2 === List.cons(wheet, reste3) &&
-        reste3 === List.cons(pause, reste)&&
+        reste3 === List.cons(pause, reste)
 
     }
 }
@@ -190,11 +191,33 @@ func reconnaisSaFermar(SeqSifl: Term, reste: Term) -> Goal{
 
       return
         SeqSifl === List.cons(long, reste1) &&
-        reste4 === List.cons(pause, reste)&&
+        reste1 === List.cons(pause, reste)
 
     }
 }
 
+
+func traducteur(OrdreHeidi: Term, OrdreTita: Term) -> Goal {
+  return (OrdreHeidi === List.empty && OrdreTita === List.empty) || //cas terminal
+    freshn{g in
+      let resteHeidi = g["resteHeidi"]
+      let resteTita = g["resteTita"]
+      let premierOrdreHeidi = g["premierOrdreHeidi"]
+
+      return //On parcourt tout les ordres possibles
+        OrdreHeidi === List.cons(premierOrdreHeidi, resteHeidi) && (
+          (premierOrdreHeidi === deponer && reconnaisDeponer(SeqSifl: OrdreTita, reste: resteTita)) ||
+          (premierOrdreHeidi === dretg && reconnaisDretg(SeqSifl: OrdreTita, reste: resteTita)) ||
+          (premierOrdreHeidi === sanester && reconnaisSanester(SeqSifl: OrdreTita, reste: resteTita)) ||
+          (premierOrdreHeidi === davent && reconnaisDavent(SeqSifl: OrdreTita, reste: resteTita)) ||
+          (premierOrdreHeidi === davos && reconnaisDavos(SeqSifl: OrdreTita, reste: resteTita)) ||
+          (premierOrdreHeidi === plaun && reconnaisPlaun(SeqSifl: OrdreTita, reste: resteTita)) ||
+          (premierOrdreHeidi === returnar && reconnaisReturnar(SeqSifl: OrdreTita, reste: resteTita)) ||
+          (premierOrdreHeidi === sa_fermar && reconnaisSaFermar(SeqSifl: OrdreTita, reste: resteTita))
+        ) &&
+        traducteur(OrdreHeidi: resteHeidi, OrdreTita: resteTita)
+    }
+}
 
 
 
