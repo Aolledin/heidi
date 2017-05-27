@@ -99,6 +99,8 @@ dretg =evalOrdre=> whee::who
 
 etc.
 
+
+
 */
 
 
@@ -245,6 +247,26 @@ vide =evalSeqSifl=> vide
 Sifl =evalSiflet=> ordre, resteSifl =evalSeqSifl=> resteOrdre
 -------------------------------------------------------------
 Sifl::pause::resteSifl =evalSeqSifl=> ordre :: resteOrdre
+
+
+Heidi vers Tita:
+
+On va définir la flèche =evalSeqOrdre=> qui prends une séquence d'ordre et rend une séquence de coups de siflets.
+
+
+--------------------------
+vide =evalSeqOrdre=> vide
+
+
+ordre =evalOrdre=> Sifl, resteOrdre =evalSeqOrdre=> resteOrdre
+------------------------------------------------------------------------------
+ordre :: resteOrdre =evalSeqOrdre=> Sifl::pause::resteOrdre
+
+
+
+
+
+
 
 
 */
@@ -407,7 +429,22 @@ func reconnaisSaFermar2(SeqSifl: Term, reste: Term) -> Goal{
 }
 
 
+//Cette fois, j'ajoute une fonction qui fais la correspondance entre l'ordre et la séquence de siflets.
 
+func correspondance(premierOrdreHeidi: Term, OrdreTita: Term, resteTitaAvecPause: Term) -> Goal {
+  return
+    (premierOrdreHeidi === deponer && reconnaisDeponer2(SeqSifl: OrdreTita, reste: resteTitaAvecPause)) ||
+    (premierOrdreHeidi === dretg && reconnaisDretg2(SeqSifl: OrdreTita, reste: resteTitaAvecPause)) ||
+    (premierOrdreHeidi === sanester && reconnaisSanester2(SeqSifl: OrdreTita, reste: resteTitaAvecPause)) ||
+    (premierOrdreHeidi === davent && reconnaisDavent2(SeqSifl: OrdreTita, reste: resteTitaAvecPause)) ||
+    (premierOrdreHeidi === davos && reconnaisDavos2(SeqSifl: OrdreTita, reste: resteTitaAvecPause)) ||
+    (premierOrdreHeidi === plaun && reconnaisPlaun2(SeqSifl: OrdreTita, reste: resteTitaAvecPause)) ||
+    (premierOrdreHeidi === returnar && reconnaisReturnar2(SeqSifl: OrdreTita, reste: resteTitaAvecPause)) ||
+    (premierOrdreHeidi === sa_fermar && reconnaisSaFermar2(SeqSifl: OrdreTita, reste: resteTitaAvecPause))
+
+}
+
+//OrdreTita est la totalité des siflements, OrdreHeidi est la totalité des ordres.
 func traducteur2(OrdreHeidi: Term, OrdreTita: Term) -> Goal {
   return (OrdreHeidi === List.empty && OrdreTita === List.empty) || //cas terminal
     freshn{g in
@@ -417,23 +454,49 @@ func traducteur2(OrdreHeidi: Term, OrdreTita: Term) -> Goal {
       let premierOrdreHeidi = g["premierOrdreHeidi"]
 
       return //idem qu'avant, on ajoute juste la pause à la fin.
-        OrdreHeidi === List.cons(premierOrdreHeidi, resteHeidi) && (
-          (premierOrdreHeidi === deponer && reconnaisDeponer2(SeqSifl: OrdreTita, reste: resteTitaAvecPause)) ||
-          (premierOrdreHeidi === dretg && reconnaisDretg2(SeqSifl: OrdreTita, reste: resteTitaAvecPause)) ||
-          (premierOrdreHeidi === sanester && reconnaisSanester2(SeqSifl: OrdreTita, reste: resteTitaAvecPause)) ||
-          (premierOrdreHeidi === davent && reconnaisDavent2(SeqSifl: OrdreTita, reste: resteTitaAvecPause)) ||
-          (premierOrdreHeidi === davos && reconnaisDavos2(SeqSifl: OrdreTita, reste: resteTitaAvecPause)) ||
-          (premierOrdreHeidi === plaun && reconnaisPlaun2(SeqSifl: OrdreTita, reste: resteTitaAvecPause)) ||
-          (premierOrdreHeidi === returnar && reconnaisReturnar2(SeqSifl: OrdreTita, reste: resteTitaAvecPause)) ||
-          (premierOrdreHeidi === sa_fermar && reconnaisSaFermar2(SeqSifl: OrdreTita, reste: resteTitaAvecPause))
-        ) &&
+        OrdreHeidi === List.cons(premierOrdreHeidi, resteHeidi) &&
+
+        correspondance(premierOrdreHeidi: premierOrdreHeidi, OrdreTita: OrdreTita, resteTitaAvecPause: resteTitaAvecPause) &&
+
         reconnaisPause(SeqSifl: resteTitaAvecPause, reste: resteTitaSansPause) &&
         traducteur(OrdreHeidi: resteHeidi, OrdreTita: resteTitaSansPause)
     }
 }
 
 
+/*
 
+Preuve:
+
+Je vais prouver que Heidi vers Tita vers Heidi retourne bien les ordres originels.
+Je vais pour ça utiliser une récurence sur le nombre d'ordre dans la séquence d'Hedi.
+
+Avec 0 ordre, on a bien
+
+vide =evalSeqOrdre=> vide =evalSeqSifl=> vide
+
+et on n'a pas le choix des flèches, puisqu'on n'a qu'une flèche qui part d'un ensemble vide.
+
+On suppose maintenant que les fonctions fonctionnent pour n-1 ordres, on va montrer que les fonctions marchent pour n ordres.
+
+On suppose que le premier ordre d'Heidi est dretg:
+
+on a donc quelque chose de la forme: dretg::resteHeidi
+
+
+dretg::resteHeidi =evalSeqOrdre=> Hee::Wheet::pause::resteTita car dretg =evalOrdre=> Hee::Wheet, et on n'a pas le choix de la flèche.
+
+On sait juste que resteTita est la séquence de siflement provenant du resteHeidi, et est correct par l'hypothèse de récurrence.
+
+maintenant, on a que:
+
+Hee::Wheet::pause::resteTita =evalSeqSifl=> dretg::resteHeidi. Car Hee::Wheet =evalSiflet=> dretg, on ne peut pas prendre d'autres flèche
+car aucune =evalSiflet=> n'a de pause à gauche, et il faut prendre tout ce qui est à droite de la pause. De plus, il n'y a qu'une évaluation
+possible pour Hee::Wheet. resteTita s'évalue en resteHeidi par l'hypothèse de récurrence.
+
+On peut appliquer le même argument à tout les ordres, ce qui conclut la preuve. □ 
+
+*/
 
 
 

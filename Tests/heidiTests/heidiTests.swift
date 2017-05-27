@@ -110,6 +110,30 @@ class heidiTests: XCTestCase {
     }
 
 
+    func testTraducteurDouble2() {
+      let v = Variable(named: "v")
+
+      let aTraduire = List.cons(dretg, List.cons(dretg, List.cons(sa_fermar, List.cons(returnar, List.cons(deponer, List.empty)))))
+      let goal = traducteur2(OrdreHeidi: aTraduire, OrdreTita: v)
+      let expected = aTraduire
+      var trouve : Bool = false
+      for sub in solve(goal) {
+        let r = sub.reified()
+        let w = Variable(named: "w")
+        let aTraduire2 = r[v]
+        let goal2 = traducteur2(OrdreHeidi: w, OrdreTita: aTraduire2)
+        for sub in solve(goal2){
+          let s = sub.reified()
+          trouve = true
+          XCTAssert(s[w].equals(expected), "traducteur is incorrect")
+        }
+
+      }
+      XCTAssert(trouve, "traducteur found nothing")
+
+    }
+
+
 
 
 
@@ -130,6 +154,8 @@ class heidiTests: XCTestCase {
         ("testDretg2", testDretg2),
         ("testPause", testPause),
         ("testTraducteur2", testTraducteur2),
+        ("testTraducteurDouble2", testTraducteurDouble2),
+
 
     ]
 }
