@@ -45,7 +45,6 @@ let sa_fermar = Value("Sa fermar")
 
 
 
-//reconnais qu'on a deponer au début de la liste.
 
 /*Sytaxe de Tita:
 
@@ -70,6 +69,40 @@ J'ai choisi d'ajouter une pause à la fin de la séquence pour simplifier l'impl
 
 
 */
+
+/*Sémantique d'évaluation
+
+Tita vers Heidi:
+
+on définit ici la flèche =evalSiflet=> qui prend une séquence de coup de siflets et rends un ordres
+
+----------------------------------
+court::court =evalSiflet=> deponer
+
+
+-----------------------------
+whee::who =evalSiflet=> dretg
+
+et ainsi de suite pour les autres ordres
+
+
+Heidi vers Tita:
+
+on définit la flèche =evalOrdre=> qui prend un ordre et rend une séquence de coups de siflets.
+
+---------------------------------
+deponer =evalOrdre=> court::court
+
+
+---------------------------------
+dretg =evalOrdre=> whee::who
+
+etc.
+
+*/
+
+
+//reconnais qu'on a deponer au début de la liste.
 
 func reconnaisDeponer(SeqSifl: Term, reste: Term) -> Goal{
   return
@@ -196,6 +229,28 @@ func reconnaisSaFermar(SeqSifl: Term, reste: Term) -> Goal{
     }
 }
 
+/* Sémantique:
+
+
+Tita vers Heidi:
+
+On définit la flèche =evalSeqSifl=> qui prends une séquence de coups de siflets et rend une séquence d'ordres.
+
+
+------------------------
+vide =evalSeqSifl=> vide
+
+
+
+Sifl =evalSiflet=> ordre, resteSifl =evalSeqSifl=> resteOrdre
+-------------------------------------------------------------
+Sifl::pause::resteSifl =evalSeqSifl=> ordre :: resteOrdre
+
+
+*/
+
+
+//Le traducteur est bidirectionnel (vive les langages logiques \o/!)
 
 func traducteur(OrdreHeidi: Term, OrdreTita: Term) -> Goal {
   return (OrdreHeidi === List.empty && OrdreTita === List.empty) || //cas terminal
@@ -204,7 +259,7 @@ func traducteur(OrdreHeidi: Term, OrdreTita: Term) -> Goal {
       let resteTita = g["resteTita"]
       let premierOrdreHeidi = g["premierOrdreHeidi"]
 
-      return //On parcourt tout les ordres possibles
+      return //On parcourt tout les ordres possibles, on aurait pu en faire une fonction à part, mais ça n'aurait pas simplifier le code
         OrdreHeidi === List.cons(premierOrdreHeidi, resteHeidi) && (
           (premierOrdreHeidi === deponer && reconnaisDeponer(SeqSifl: OrdreTita, reste: resteTita)) ||
           (premierOrdreHeidi === dretg && reconnaisDretg(SeqSifl: OrdreTita, reste: resteTita)) ||
