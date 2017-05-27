@@ -273,7 +273,7 @@ ordre :: resteOrdre =evalSeqOrdre=> Sifl::pause::resteOrdre
 
 
 //Le traducteur est bidirectionnel (vive les langages logiques \o/!)
-
+//Il traduit une liste d'ordre en une liste de coup de siflet.
 func traducteur(OrdreHeidi: Term, OrdreTita: Term) -> Goal {
   return (OrdreHeidi === List.empty && OrdreTita === List.empty) || //cas terminal
     freshn{g in
@@ -430,6 +430,7 @@ func reconnaisSaFermar2(SeqSifl: Term, reste: Term) -> Goal{
 
 
 //Cette fois, j'ajoute une fonction qui fais la correspondance entre l'ordre et la séquence de siflets.
+//M'évite de copier/coller cette partie quand on enlève les pauses.
 
 func correspondance(premierOrdreHeidi: Term, OrdreTita: Term, resteTitaAvecPause: Term) -> Goal {
   return
@@ -459,7 +460,7 @@ func traducteur2(OrdreHeidi: Term, OrdreTita: Term) -> Goal {
         correspondance(premierOrdreHeidi: premierOrdreHeidi, OrdreTita: OrdreTita, resteTitaAvecPause: resteTitaAvecPause) &&
 
         reconnaisPause(SeqSifl: resteTitaAvecPause, reste: resteTitaSansPause) &&
-        traducteur(OrdreHeidi: resteHeidi, OrdreTita: resteTitaSansPause)
+        traducteur2(OrdreHeidi: resteHeidi, OrdreTita: resteTitaSansPause)
     }
 }
 
@@ -494,54 +495,45 @@ Hee::Wheet::pause::resteTita =evalSeqSifl=> dretg::resteHeidi. Car Hee::Wheet =e
 car aucune =evalSiflet=> n'a de pause à gauche, et il faut prendre tout ce qui est à droite de la pause. De plus, il n'y a qu'une évaluation
 possible pour Hee::Wheet. resteTita s'évalue en resteHeidi par l'hypothèse de récurrence.
 
-On peut appliquer le même argument à tout les ordres, ce qui conclut la preuve. □ 
+On peut appliquer le même argument à tout les ordres, ce qui conclut la preuve. □
 
 */
 
 
+//Accélération.
+
+//On utilise le même code qu'avant, on enlève juste la partie qui ajoutait les pauses dans le traducteur.
 
 
+func traducteurSansPause(OrdreHeidi: Term, OrdreTita: Term) -> Goal {
+  return (OrdreHeidi === List.empty && OrdreTita === List.empty) || //cas terminal
+    freshn{g in
+      let resteHeidi = g["resteHeidi"]
+      let resteTita = g["resteTita"]
+      let premierOrdreHeidi = g["premierOrdreHeidi"]
+
+      return //idem qu'avant, on ajoute juste la pause à la fin.
+        OrdreHeidi === List.cons(premierOrdreHeidi, resteHeidi) &&
+
+        correspondance(premierOrdreHeidi: premierOrdreHeidi, OrdreTita: OrdreTita, resteTitaAvecPause: resteTita) &&
+        traducteurSansPause(OrdreHeidi: resteHeidi, OrdreTita: resteTita)
+    }
+}
+
+/*On remarque que plusieurs solutions sont trouvées. Ce qui est cohérent.
+Il est en revanche impossible de donner la liste de tout les problèmes possible, car elle est infinie. (en répettant l'exemple, on a déjà une infinité de série d'ordres
+qui posent soucis.)
+
+Je ne pense pas non plus qu'on puisse savoir si on a fait le tour des problèmes sans répettitions, car je dirai, insinctivement, que c'est un problème indécidable,
+il me rappelle le problème de conrespondance de Post.
+*/
 
 
+/* Commentaires généreaux:
 
+J'ai trouvé ce TP beaucoup plus facile que le précédent.
+J'espère que ce sera lisible, avec les parties syntxe/sémantique entre le code.
 
+Bonne correction :)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//fin (pour avoir de la place sous mon curseur dans atom)
+*/
